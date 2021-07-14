@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs cleaner.sh to clean up old files in docker-overlay2 subdirs
+Requires=cleaner.service
+
+[Timer]
+Unit=cleaner.service
+OnCalendar=*-*-* *:*:00
+
+[Install]
+WantedBy=timers.target

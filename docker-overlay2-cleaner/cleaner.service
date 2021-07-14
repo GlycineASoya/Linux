@@ -1,0 +1,9 @@
+# /etc/systemd/system/cleaner.service
+[Unit]
+Description=Runs cleaner.sh to clean up old files in docker-overlay2 subdirs
+Wants=cleaner.timer
+[Service]
+ExecStart=/usr/local/bin/cleaner /docker-overlay/docker/overlay2
+Type=oneshot
+[Install]
+WantedBy=multi-user.target
