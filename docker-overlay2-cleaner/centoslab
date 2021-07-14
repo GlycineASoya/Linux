@@ -1,0 +1,7 @@
+#!/bin/bash
+#du -sch /docker-overlay/docker/overlay2/* | awk '{print $2}' # | grep G
+dirs=($(du -sch /docker-overlay/docker/overlay2/* | awk '{print $2}'))
+for dir in dirs
+do
+    ( cd "$dir" && echo "$dir" )
+done
