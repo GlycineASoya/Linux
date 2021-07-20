@@ -1,25 +1,18 @@
-#!/bin/bash 
+#!/bin/bash
 get_subdirs () {
-  #false - get the list of subdirs with the files inside
-  #true - get all subdirs
-  needWriteToResult=false
-  for dir in $(du -sch $1/* 2>>/dev/null | grep $2 | awk '{print $2}')
+  for dir in $(du -sch $1/* | grep $2 | awk '{print $2}')
   do
-    if [ -d "$dir" ]
+    if [ $dir != "total" ]
     then
-      if [ $dir != "total" ]
+      if [ -d "$dir" ]
       then
-        needWriteToResult=false
         get_subdirs "$dir" "$2"
-      else
-        needWriteToResult=true
       fi
     fi
   done
-  if [ $needWriteToResult == true ]
+  if [[ $1 =~ "/tmp" ]]
   then
       subdirs+=$1$'\n'
-      needWriteToResult=false
   fi
 }
 
@@ -43,12 +36,18 @@ else
   size_limit="$2"
 fi
 
-get_subdirs "$basedir" "$size_limit"
+if [ -d /var/log/docker-overlay2 ]
+then
+  mkdir -p /var/log/docker-overlay2
+fi
 
+get_subdirs "$basedir" "$size_limit"
 for subdir in $subdirs
 do
-  echo "$subdir"
+  #add -v option
+  #DEBUG option
+  #printf "$(find $subdir -maxdepth 1 -type f -ctime +30 -printf '$(date) Ctime: %Cd/%Cm/%Cy\t%k KB\t%p\n')" | gawk '{ print strftime("%Y-%m-%d %H:%M:%S\t"), $0 }'
+  printf "$(find $subdir -maxdepth 1 -type f -ctime +30 -printf 'Ctime: %Cd/%Cm/%Cy\t%k KB\t%p\n')" | gawk '{ print strftime("%Y-%m-%d %H:%M:%S\t"), $0 }' >> /var/log/docker-overlay2/output.log
   find $subdir -maxdepth 1 -type f -ctime +30 -delete
-  echo $(date) $(find $subdir -maxdepth 1 -type f -ctime +30 -printf 'Ctime: %Cdd-mm-yyyy\t%k KB\t%p')
   find $subdir -maxdepth 1 -type f -regextype sed -regex "./core\.[0-9][0-9]*" -delete
 done
