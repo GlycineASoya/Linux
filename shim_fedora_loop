@@ -1,0 +1,10 @@
+Source: https://hansdegoede.livejournal.com/23851.html
+
+The right way: Stop shim from trying to add a bootentry pointing to EFI/fedora/shimx64.efi:
+
+`rm EFI/Boot/fbx64.efi`
+`cp EFI/fedora/grubx64.efi EFI/Boot`
+
+The first command will stop shim from trying to add a new efibootmgr entry (it calls fbx64.efi to do that for it) instead it will try to execute grubx64.efi from the from which it was executed, so we must put a grubx64.efi in the EFI/Boot dir, which the second command does. Do not use the livecd EFI/Boot/grubx64.efi file for this as I did at first, that searches for its config and env under EFI/Boot which is not what we want.
+
+Note that upgrading shim will restore EFI/Boot/fbx64.efi. To avoid this you may want to backup EFI/Boot/bootx64.efi, then do "sudo rpm -e shim-x64" and then restore the backup.
